@@ -60,6 +60,75 @@ export const SECTION_METADATA = {
   },
 };
 
+export const CUSTOM_SECTION_PRESETS = [
+  {
+    title: 'Languages',
+    icon: 'Languages',
+    description: 'Language proficiencies & certifications',
+    defaultItem: {
+      title: 'English',
+      subtitle: 'Native / Bilingual',
+      date: 'Fluent',
+      description: 'Professional working proficiency and clear communication.',
+    },
+  },
+  {
+    title: 'Volunteer Experience',
+    icon: 'HeartHandshake',
+    description: 'Community service & non-profit involvement',
+    defaultItem: {
+      title: 'Community Volunteer',
+      subtitle: 'Local Outreach Network',
+      date: '2022 – Present',
+      description: 'Coordinated regional aid programs and managed volunteer teams.',
+    },
+  },
+  {
+    title: 'Awards & Honors',
+    icon: 'Trophy',
+    description: 'Competitions, scholarships & recognitions',
+    defaultItem: {
+      title: 'Excellence in Innovation Award',
+      subtitle: 'Tech Industry Summit',
+      date: '2023',
+      description: 'Recognized for impactful architectural design and product delivery.',
+    },
+  },
+  {
+    title: 'Publications & Research',
+    icon: 'BookOpen',
+    description: 'Papers, journals, conferences & articles',
+    defaultItem: {
+      title: 'Distributed Systems at Scale',
+      subtitle: 'Software Engineering Journal',
+      date: '2023',
+      description: 'Co-authored paper evaluating real-time fault tolerance.',
+    },
+  },
+  {
+    title: 'Speaking & Conferences',
+    icon: 'Mic',
+    description: 'Keynotes, panels & industry presentations',
+    defaultItem: {
+      title: 'Conference Speaker',
+      subtitle: 'Global Developer Conference',
+      date: '2023',
+      description: 'Presented 40-minute talk on modern frontend and design systems.',
+    },
+  },
+  {
+    title: 'Interests & Activities',
+    icon: 'Compass',
+    description: 'Extracurricular pursuits & sports',
+    defaultItem: {
+      title: 'Marathon Runner & OSS Contributor',
+      subtitle: 'Athletic Club & GitHub',
+      date: 'Active',
+      description: 'Passionate about endurance running and open-source tooling.',
+    },
+  },
+];
+
 export const PRESET_SECTION_ORDERS = [
   {
     id: 'standard',
@@ -92,50 +161,81 @@ export const PRESET_SECTION_ORDERS = [
 ];
 
 /**
- * Normalizes an array of section keys, ensuring valid sections exist
+ * Normalizes an array of section keys, ensuring valid default and custom sections exist
  * without duplicates and appending any missing default sections.
  */
-export function normalizeSectionOrder(order) {
-  if (!Array.isArray(order) || order.length === 0) {
-    return [...DEFAULT_SECTION_ORDER];
-  }
+  export function normalizeSectionOrder(order, customSections = []) {
+    const customIds = Array.isArray(customSections)
+      ? customSections.map((c) => c?.id).filter(Boolean)
+      : [];
 
-  const validSet = new Set(DEFAULT_SECTION_ORDER);
-  const seen = new Set();
-  const normalized = [];
+    const validSet = new Set([...DEFAULT_SECTION_ORDER, ...customIds]);
+    const seen = new Set();
+    const normalized = [];
 
-  for (const item of order) {
-    if (typeof item === 'string' && validSet.has(item) && !seen.has(item)) {
-      normalized.push(item);
-      seen.add(item);
+      const rawOrder = Array.isArray(order) && order.length > 0 ? order : DEFAULT_SECTION_ORDER;
+
+      for (const item of rawOrder) {
+        if (typeof item === 'string' && validSet.has(item) && !seen.has(item)) {
+          normalized.push(item);
+          seen.add(item);
+        }
+      }
+
+      // Append any missing default sections
+      for (const item of DEFAULT_SECTION_ORDER) {
+        if (!seen.has(item)) {
+          normalized.push(item);
+          seen.add(item);
+        }
+      }
+
+      // Append any missing custom sections that aren't in order yet
+      for (const cid of customIds) {
+        if (!seen.has(cid)) {
+          normalized.push(cid);
+          seen.add(cid);
+        }
+      }
+
+      return normalized;
     }
-  }
 
-  // Append any missing sections in default order
-  for (const item of DEFAULT_SECTION_ORDER) {
-    if (!seen.has(item)) {
-      normalized.push(item);
-      seen.add(item);
+    /**
+     * Returns metadata for a standard or custom section key.
+     */
+    export function getSectionMetadata(sectionKey, customSections = []) {
+      if (SECTION_METADATA[sectionKey]) {
+        return { ...SECTION_METADATA[sectionKey], isCustom: false };
+      }
+
+      const custom = Array.isArray(customSections)
+        ? customSections.find((c) => c?.id === sectionKey)
+        : null;
+
+      return {
+        id: sectionKey,
+        label: custom?.title || 'Custom Section',
+        shortLabel: custom?.title || 'Custom',
+        icon: 'Sparkles',
+        description: 'User-defined custom section',
+        isCustom: true,
+      };
     }
-  }
 
-  return normalized;
-}
+    /**
+     * Moves a section up or down in the section array.
+     * direction: -1 (move up) or 1 (move down)
+     */
+      export function moveSectionInOrder(order, index, direction, customSections = []) {
+        const current = normalizeSectionOrder(order, customSections);
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= current.length) {
+          return current;
+        }
 
-/**
- * Moves a section up or down in the section array.
- * direction: -1 (move up) or 1 (move down)
- */
-export function moveSectionInOrder(order, index, direction) {
-  const current = normalizeSectionOrder(order);
-  const targetIndex = index + direction;
-  if (targetIndex < 0 || targetIndex >= current.length) {
-    return current;
-  }
-
-  const result = [...current];
-  const [moved] = result.splice(index, 1);
-  result.splice(targetIndex, 0, moved);
-  return result;
-}
-
+        const result = [...current];
+        const [moved] = result.splice(index, 1);
+        result.splice(targetIndex, 0, moved);
+        return result;
+      }

@@ -8,17 +8,20 @@ import EducationSection from '../components/editor/FormSections/EducationSection
 import ProjectsSection from '../components/editor/FormSections/ProjectsSection';
 import SkillsSection from '../components/editor/FormSections/SkillsSection';
 import CertificationsSection from '../components/editor/FormSections/CertificationsSection';
+import CustomSection from '../components/editor/FormSections/CustomSection';
 import ResumePreview from '../components/preview/ResumePreview';
 import DiffProposal from '../components/editor/DiffProposal';
 import TailorModal from '../components/editor/TailorModal';
 import RearrangeSectionsModal from '../components/editor/RearrangeSectionsModal';
+import AddCustomSectionModal from '../components/editor/AddCustomSectionModal';
 import { aiApi } from '../api/ai';
-import { ArrowUpDown, SlidersHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUpDown, SlidersHorizontal, ArrowUp, ArrowDown, Plus } from 'lucide-react';
 import {
   DEFAULT_SECTION_ORDER,
   normalizeSectionOrder,
   moveSectionInOrder,
   SECTION_METADATA,
+  getSectionMetadata,
 } from '../utils/sectionOrder';
 
 export default function EditorPage() {
@@ -31,16 +34,44 @@ export default function EditorPage() {
   const [isTailoring, setIsTailoring] = useState(false);
   const [isTailorModalOpen, setIsTailorModalOpen] = useState(false);
   const [isRearrangeModalOpen, setIsRearrangeModalOpen] = useState(false);
+  const [isAddSectionModalOpen, setIsAddSectionModalOpen] = useState(false);
 
-  const sectionOrder = normalizeSectionOrder(resume.sectionOrder);
+  const sectionOrder = normalizeSectionOrder(resume.sectionOrder, resume.customSections);
 
   const handleUpdateSectionOrder = (newOrder) => {
     handleUpdate('sectionOrder', newOrder);
   };
 
   const handleMoveSection = (index, direction) => {
-    const updated = moveSectionInOrder(sectionOrder, index, direction);
+    const updated = moveSectionInOrder(sectionOrder, index, direction, resume.customSections);
     handleUpdate('sectionOrder', updated);
+  };
+
+  const handleAddCustomSection = (newSection) => {
+    const updatedCustom = [...(resume.customSections || []), newSection];
+    const updatedOrder = [...sectionOrder, newSection.id];
+    setResume((prev) => ({
+      ...prev,
+      customSections: updatedCustom,
+      sectionOrder: updatedOrder,
+    }));
+  };
+
+  const handleUpdateCustomSection = (updatedSection) => {
+    const updatedCustom = (resume.customSections || []).map((s) =>
+      s.id === updatedSection.id ? updatedSection : s
+    );
+    handleUpdate('customSections', updatedCustom);
+  };
+
+  const handleDeleteCustomSection = (sectionId) => {
+    const updatedCustom = (resume.customSections || []).filter((s) => s.id !== sectionId);
+    const updatedOrder = sectionOrder.filter((id) => id !== sectionId);
+    setResume((prev) => ({
+      ...prev,
+      customSections: updatedCustom,
+      sectionOrder: updatedOrder,
+    }));
   };
 
   // Diff Proposal State
@@ -210,8 +241,20 @@ export default function EditorPage() {
             onChange={(data) => handleUpdate('certifications', data)}
           />
         );
-      default:
+      default: {
+        const customSection = (resume.customSections || []).find((c) => c.id === sectionKey);
+        if (customSection) {
+          return (
+            <CustomSection
+              key={customSection.id}
+              section={customSection}
+              onChange={handleUpdateCustomSection}
+              onDelete={handleDeleteCustomSection}
+            />
+          );
+        }
         return null;
+      }
     }
   };
 
@@ -233,124 +276,172 @@ export default function EditorPage() {
           className={`w-full lg:w-1/2 h-full overflow-y-auto bg-cv-slate-50 border-r border-cv-slate-200 p-4 sm:p-6 lg:p-8 space-y-6 ${mobileTab === 'edit' ? 'block' : 'hidden lg:block'
             }`}
         >
-            <div className="max-w-2xl mx-auto space-y-5 pb-20">
-              {/* Rearrange Sections Top Toolbar */}
-              <div className="bg-white rounded-xl border border-cv-slate-200 p-3 sm:px-4 sm:py-3 shadow-xs flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-cv-blue flex items-center justify-center shrink-0">
-                    <ArrowUpDown className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-cv-slate-900 flex items-center gap-2">
-                      <span>Section Sequence</span>
-                      <span className="text-[10px] font-semibold text-cv-slate-500 bg-cv-slate-100 px-2 py-0.5 rounded-md border border-cv-slate-200">
-                        {sectionOrder.length} Sections
-                      </span>
+          <div className="max-w-2xl mx-auto space-y-5 pb-20">
+            {/* Rearrange Sections Top Toolbar */}
+                <div className="bg-white rounded-xl border border-cv-slate-200 p-3 sm:px-4 sm:py-3 shadow-xs flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-blue-50 text-cv-blue flex items-center justify-center shrink-0">
+                      <ArrowUpDown className="w-3.5 h-3.5" />
                     </div>
-                    <p className="text-[11px] text-cv-slate-500 hidden sm:block">
-                      Use arrows on any section or click to reorder all
-                    </p>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-cv-slate-900 flex items-center gap-2">
+                          <span>Section Sequence</span>
+                          <span className="text-[10px] font-semibold text-cv-slate-500 bg-cv-slate-100 px-2 py-0.5 rounded-md border border-cv-slate-200">
+                            {sectionOrder.length} Sections
+                          </span>
+                        </div>
+                          <p className="text-[11px] text-cv-slate-500 hidden sm:block truncate">
+                            Use arrows on any section or click to reorder all
+                          </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddSectionModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-cv-slate-700 hover:text-cv-blue bg-cv-slate-100 hover:bg-blue-50 border border-cv-slate-200 hover:border-blue-200 rounded-lg transition-all shadow-2xs cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5 text-cv-blue" />
+                        <span>Add Section</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsRearrangeModalOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-cv-blue hover:text-white bg-blue-50 hover:bg-cv-blue border border-blue-200 hover:border-transparent rounded-lg transition-all shadow-2xs cursor-pointer"
+                      >
+                        <SlidersHorizontal className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Rearrange All</span>
+                        <span className="sm:hidden">Rearrange</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Dynamically Ordered Section Cards */}
+                  {sectionOrder.map((sectionKey, index) => {
+                    const meta = getSectionMetadata(sectionKey, resume.customSections);
+                    const isFirst = index === 0;
+                    const isLast = index === sectionOrder.length - 1;
+
+                    return (
+                      <div key={sectionKey} className="space-y-1.5">
+                        {/* Section Position Pill & Controls */}
+                        <div className="flex items-center justify-between px-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="inline-flex items-center justify-center w-4.5 h-4.5 rounded bg-cv-slate-200 text-[10px] font-bold text-cv-slate-700">
+                              {index + 1}
+                            </span>
+                            <span className="text-[10.5px] font-bold uppercase tracking-wider text-cv-slate-500">
+                              {meta.label}
+                            </span>
+                            {meta.isCustom && (
+                              <span className="text-[9.5px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.2 rounded-md">
+                                Custom
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-0.5 bg-white border border-cv-slate-200 rounded-md p-0.5 shadow-2xs">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveSection(index, -1)}
+                              disabled={isFirst}
+                              title={`Move ${meta.label} Up`}
+                              className="p-1 rounded hover:bg-cv-slate-100 text-cv-slate-600 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
+                              <ArrowUp className="w-3.5 h-3.5" />
+                            </button>
+                            <div className="w-[1px] h-3 bg-cv-slate-200" />
+                            <button
+                              type="button"
+                              onClick={() => handleMoveSection(index, 1)}
+                              disabled={isLast}
+                              title={`Move ${meta.label} Down`}
+                              className="p-1 rounded hover:bg-cv-slate-100 text-cv-slate-600 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
+                              <ArrowDown className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {renderSectionComponent(sectionKey)}
+                      </div>
+                    );
+                  })}
+
+                  {/* Add Custom Section Bottom Banner Card */}
+                  <button
+                    type="button"
+                    onClick={() => setIsAddSectionModalOpen(true)}
+                    className="w-full py-4 px-4 border-2 border-dashed border-cv-slate-300 hover:border-cv-blue hover:bg-blue-50/40 rounded-2xl transition-all flex items-center justify-center gap-3 text-cv-slate-600 hover:text-cv-blue group cursor-pointer shadow-2xs"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-cv-slate-100 group-hover:bg-blue-100/80 text-cv-slate-500 group-hover:text-cv-blue flex items-center justify-center transition-colors">
+                      <Plus className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-xs font-bold text-cv-slate-800 group-hover:text-cv-blue">
+                        Add Custom Section
+                      </div>
+                      <div className="text-[11px] text-cv-slate-500">
+                        Add Languages, Volunteer, Awards, Publications or any custom heading
+                      </div>
+                    </div>
+                  </button>
                 </div>
+              </section>
 
-                <button
-                  type="button"
-                  onClick={() => setIsRearrangeModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-cv-blue hover:text-white bg-blue-50 hover:bg-cv-blue border border-blue-200 hover:border-transparent rounded-lg transition-all shadow-2xs cursor-pointer"
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>Rearrange All</span>
-                </button>
-              </div>
+              {/* Right Panel: Live Preview */}
+              <section
+                className={`w-full lg:w-1/2 h-full overflow-hidden ${mobileTab === 'preview' ? 'block' : 'hidden lg:block'
+                  }`}
+              >
+                <ResumePreview
+                  resume={resume}
+                  activeTemplate={activeTemplate}
+                  onTemplateChange={setActiveTemplate}
+                />
+              </section>
+            </main>
 
-              {/* Dynamically Ordered Section Cards */}
-              {sectionOrder.map((sectionKey, index) => {
-                const meta = SECTION_METADATA[sectionKey] || { label: sectionKey };
-                const isFirst = index === 0;
-                const isLast = index === sectionOrder.length - 1;
+            {/* Diff Proposal Modal */}
+            <DiffProposal
+              isOpen={diffProposal.isOpen}
+              title={diffProposal.title}
+              contextNote={diffProposal.contextNote}
+              original={diffProposal.original}
+              suggested={diffProposal.suggested}
+              onAccept={diffProposal.onAccept}
+              onReject={() => setDiffProposal((p) => ({ ...p, isOpen: false }))}
+            />
 
-                return (
-                  <div key={sectionKey} className="space-y-1.5">
-                    {/* Section Position Pill & Controls */}
-                    <div className="flex items-center justify-between px-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="inline-flex items-center justify-center w-4.5 h-4.5 rounded bg-cv-slate-200 text-[10px] font-bold text-cv-slate-700">
-                          {index + 1}
-                        </span>
-                        <span className="text-[10.5px] font-bold uppercase tracking-wider text-cv-slate-500">
-                          {meta.label}
-                        </span>
-                      </div>
+            {/* Tailor Job Description Modal */}
+            <TailorModal
+              isOpen={isTailorModalOpen}
+              onClose={() => setIsTailorModalOpen(false)}
+              onTailorSubmit={handleTailorSubmit}
+              isTailoring={isTailoring}
+            />
 
-                      <div className="flex items-center gap-0.5 bg-white border border-cv-slate-200 rounded-md p-0.5 shadow-2xs">
-                        <button
-                          type="button"
-                          onClick={() => handleMoveSection(index, -1)}
-                          disabled={isFirst}
-                          title={`Move ${meta.label} Up`}
-                          className="p-1 rounded hover:bg-cv-slate-100 text-cv-slate-600 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
-                        >
-                          <ArrowUp className="w-3.5 h-3.5" />
-                        </button>
-                        <div className="w-[1px] h-3 bg-cv-slate-200" />
-                        <button
-                          type="button"
-                          onClick={() => handleMoveSection(index, 1)}
-                          disabled={isLast}
-                          title={`Move ${meta.label} Down`}
-                          className="p-1 rounded hover:bg-cv-slate-100 text-cv-slate-600 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
-                        >
-                          <ArrowDown className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
+            {/* Rearrange Sections Modal */}
+            <RearrangeSectionsModal
+              isOpen={isRearrangeModalOpen}
+              onClose={() => setIsRearrangeModalOpen(false)}
+              sectionOrder={sectionOrder}
+              customSections={resume.customSections || []}
+              onUpdateOrder={handleUpdateSectionOrder}
+              onOpenAddSection={() => {
+                setIsRearrangeModalOpen(false);
+                setIsAddSectionModalOpen(true);
+              }}
+            />
 
-                    {renderSectionComponent(sectionKey)}
-                  </div>
-                );
-              })}
-            </div>
-        </section>
-
-        {/* Right Panel: Live Preview */}
-        <section
-          className={`w-full lg:w-1/2 h-full overflow-hidden ${mobileTab === 'preview' ? 'block' : 'hidden lg:block'
-            }`}
-        >
-          <ResumePreview
-            resume={resume}
-            activeTemplate={activeTemplate}
-            onTemplateChange={setActiveTemplate}
-          />
-        </section>
-      </main>
-
-      {/* Diff Proposal Modal */}
-      <DiffProposal
-        isOpen={diffProposal.isOpen}
-        title={diffProposal.title}
-        contextNote={diffProposal.contextNote}
-        original={diffProposal.original}
-        suggested={diffProposal.suggested}
-        onAccept={diffProposal.onAccept}
-        onReject={() => setDiffProposal((p) => ({ ...p, isOpen: false }))}
-      />
-
-      {/* Tailor Job Description Modal */}
-      <TailorModal
-        isOpen={isTailorModalOpen}
-        onClose={() => setIsTailorModalOpen(false)}
-        onTailorSubmit={handleTailorSubmit}
-        isTailoring={isTailoring}
-      />
-
-      {/* Rearrange Sections Modal */}
-      <RearrangeSectionsModal
-        isOpen={isRearrangeModalOpen}
-        onClose={() => setIsRearrangeModalOpen(false)}
-        sectionOrder={sectionOrder}
-        onUpdateOrder={handleUpdateSectionOrder}
-      />
-    </div>
-  );
+            {/* Add Custom Section Modal */}
+            <AddCustomSectionModal
+              isOpen={isAddSectionModalOpen}
+              onClose={() => setIsAddSectionModalOpen(false)}
+              onAddSection={handleAddCustomSection}
+            />
+          </div>
+          );
 }

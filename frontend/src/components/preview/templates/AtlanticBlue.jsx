@@ -3,7 +3,7 @@ import { normalizeSectionOrder } from '../../../utils/sectionOrder';
 
 export default function AtlanticBlue({ resume }) {
   const { personal = {}, summary = '', experience = [], education = [], projects = [], skills = [], certifications = [], languages = [] } = resume || {};
-  const sectionOrder = normalizeSectionOrder(resume?.sectionOrder);
+  const sectionOrder = normalizeSectionOrder(resume?.sectionOrder, resume?.customSections);
 
   const initials = (personal.fullName || 'User')
     .split(' ')
@@ -134,108 +134,139 @@ export default function AtlanticBlue({ resume }) {
       </aside>
 
       {/* Right Content */}
-        <main className="flex-1 px-8 py-[18mm] space-y-5 bg-white text-cv-slate-800">
-          {sectionOrder.map((sectionKey) => {
-            switch (sectionKey) {
-              case 'experience':
-                if (experience.length === 0) return null;
-                return (
-                  <section key="experience" className="resume-section-block">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-3 flex items-center gap-2 resume-section-header">
-                      Work Experience
-                    </h2>
-                    <div className="space-y-4">
-                      {experience.map((exp) => (
-                        <div key={exp.id || exp._id} className="space-y-1 resume-section-item">
-                          <div className="flex justify-between items-baseline">
-                            <h3 className="text-[13px] font-bold text-slate-900">{exp.role}</h3>
-                            <span className="text-[11px] font-medium text-slate-500">
-                              {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-[11px] text-blue-700 font-medium">
-                            <span>{exp.company}</span>
-                            {exp.location && <span className="text-slate-500 font-normal">{exp.location}</span>}
-                          </div>
-                          {exp.bullets && exp.bullets.length > 0 && (
-                            <ul className="list-disc list-outside ml-4 space-y-1 text-[11px] text-slate-700 leading-relaxed mt-1.5">
-                              {exp.bullets.filter(Boolean).map((bullet, idx) => (
-                                <li key={idx}>{bullet}</li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                );
-
-              case 'education':
-                if (education.length === 0) return null;
-                return (
-                  <section key="education" className="resume-section-block">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-2.5 resume-section-header">
-                      Education
-                    </h2>
-                    <div className="space-y-2.5">
-                      {education.map((edu) => (
-                        <div key={edu.id || edu._id} className="resume-section-item">
-                          <div className="flex justify-between items-baseline">
-                            <h3 className="text-xs font-bold text-slate-900">{edu.school}</h3>
-                            <span className="text-[10px] text-slate-500">{edu.startDate} – {edu.endDate}</span>
-                          </div>
-                          <div className="text-[11px] text-slate-700">
-                            {edu.degree} {edu.gpa && <span className="text-slate-500">• GPA: {edu.gpa}</span>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                );
-
-              case 'skills':
-                if (skills.length === 0) return null;
-                return (
-                  <section key="skills" className="resume-section-block">
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-2 resume-section-header">
-                      Skills
-                    </h2>
-                    <div className="space-y-2 text-[11px]">
-                      {skills.map((grp, idx) => (
-                        <div key={idx} className="flex flex-wrap items-baseline gap-1.5 resume-section-item">
-                          <span className="font-bold text-slate-900 min-w-[85px]">{grp.category}:</span>
-                          <span className="text-slate-700">
-                            {Array.isArray(grp.items) ? grp.items.join(', ') : grp.items}
+      <main className="flex-1 px-8 py-[18mm] space-y-5 bg-white text-cv-slate-800">
+        {sectionOrder.map((sectionKey) => {
+          switch (sectionKey) {
+            case 'experience':
+              if (experience.length === 0) return null;
+              return (
+                <section key="experience" className="resume-section-block">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-3 flex items-center gap-2 resume-section-header">
+                    Work Experience
+                  </h2>
+                  <div className="space-y-4">
+                    {experience.map((exp) => (
+                      <div key={exp.id || exp._id} className="space-y-1 resume-section-item">
+                        <div className="flex justify-between items-baseline">
+                          <h3 className="text-[13px] font-bold text-slate-900">{exp.role}</h3>
+                          <span className="text-[11px] font-medium text-slate-500">
+                            {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                           </span>
                         </div>
-                      ))}
-                    </div>
-                  </section>
-                );
+                        <div className="flex justify-between text-[11px] text-blue-700 font-medium">
+                          <span>{exp.company}</span>
+                          {exp.location && <span className="text-slate-500 font-normal">{exp.location}</span>}
+                        </div>
+                        {exp.bullets && exp.bullets.length > 0 && (
+                          <ul className="list-disc list-outside ml-4 space-y-1 text-[11px] text-slate-700 leading-relaxed mt-1.5">
+                            {exp.bullets.filter(Boolean).map((bullet, idx) => (
+                              <li key={idx}>{bullet}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
 
-        case 'projects':
-        if (projects.length === 0) return null;
-        return (
-        <section key="projects" className="resume-section-block">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-2 resume-section-header">
-            Key Projects
-          </h2>
-          <div className="space-y-2.5 text-[11px]">
-            {projects.map((proj) => (
-              <div key={proj.id || proj._id} className="resume-section-item">
-                <div className="flex justify-between font-bold text-slate-900">
-                  <span>{proj.name}</span>
-                  {proj.technologies && <span className="text-[10px] font-normal text-slate-500 italic">{proj.technologies}</span>}
-                </div>
-                {proj.description && <p className="text-[10.5px] text-slate-600 mt-0.5 leading-snug">{proj.description}</p>}
-              </div>
-            ))}
-          </div>
-        </section>
-        );
+            case 'education':
+              if (education.length === 0) return null;
+              return (
+                <section key="education" className="resume-section-block">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-2.5 resume-section-header">
+                    Education
+                  </h2>
+                  <div className="space-y-2.5">
+                    {education.map((edu) => (
+                      <div key={edu.id || edu._id} className="resume-section-item">
+                        <div className="flex justify-between items-baseline">
+                          <h3 className="text-xs font-bold text-slate-900">{edu.school}</h3>
+                          <span className="text-[10px] text-slate-500">{edu.startDate} – {edu.endDate}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-700">
+                          {edu.degree} {edu.gpa && <span className="text-slate-500">• GPA: {edu.gpa}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
 
-        default:
-        return null;
+            case 'skills':
+              if (skills.length === 0) return null;
+              return (
+                <section key="skills" className="resume-section-block">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-2 resume-section-header">
+                    Skills
+                  </h2>
+                  <div className="space-y-2 text-[11px]">
+                    {skills.map((grp, idx) => (
+                      <div key={idx} className="flex flex-wrap items-baseline gap-1.5 resume-section-item">
+                        <span className="font-bold text-slate-900 min-w-[85px]">{grp.category}:</span>
+                        <span className="text-slate-700">
+                          {Array.isArray(grp.items) ? grp.items.join(', ') : grp.items}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+
+            case 'projects':
+              if (projects.length === 0) return null;
+              return (
+                <section key="projects" className="resume-section-block">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-2 resume-section-header">
+                    Key Projects
+                  </h2>
+                  <div className="space-y-2.5 text-[11px]">
+                    {projects.map((proj) => (
+                      <div key={proj.id || proj._id} className="resume-section-item">
+                        <div className="flex justify-between font-bold text-slate-900">
+                          <span>{proj.name}</span>
+                          {proj.technologies && <span className="text-[10px] font-normal text-slate-500 italic">{proj.technologies}</span>}
+                        </div>
+                        {proj.description && <p className="text-[10.5px] text-slate-600 mt-0.5 leading-snug">{proj.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+
+            default: {
+              const custom = (resume?.customSections || []).find((c) => c.id === sectionKey);
+              if (!custom || !custom.items || custom.items.length === 0) return null;
+              return (
+                <section key={custom.id} className="resume-section-block">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-[#1E293B] border-b-2 border-[#1E293B] pb-1 mb-2.5 resume-section-header">
+                    {custom.title}
+                  </h2>
+                  <div className="space-y-2.5 text-[11px]">
+                    {custom.items.map((item, idx) => (
+                      <div key={item.id || idx} className="resume-section-item">
+                        <div className="flex justify-between items-baseline font-bold text-slate-900">
+                          <span>{item.title}</span>
+                          {item.date && (
+                            <span className="text-[10px] font-normal text-slate-500">{item.date}</span>
+                          )}
+                        </div>
+                        {item.subtitle && (
+                          <div className="text-[11px] text-blue-700 font-medium">
+                            {item.subtitle}
+                          </div>
+                        )}
+                        {item.description && (
+                          <p className="text-[10.5px] text-slate-600 mt-0.5 leading-snug">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            }
           }
         })}
       </main>

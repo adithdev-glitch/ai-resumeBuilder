@@ -3,60 +3,60 @@ import { normalizeSectionOrder } from '../../../utils/sectionOrder';
 
 export default function ElegantSerif({ resume }) {
   const { personal = {}, summary = '', experience = [], education = [], projects = [], skills = [], certifications = [] } = resume || {};
-  const sectionOrder = normalizeSectionOrder(resume?.sectionOrder);
+  const sectionOrder = normalizeSectionOrder(resume?.sectionOrder, resume?.customSections);
 
   const renderSection = (key) => {
     switch (key) {
       case 'personal':
-      return (
-      <header key="personal" className="border-t-4 border-b border-[#333] py-4 mb-5 text-center">
-        <h1 className="text-3xl font-normal tracking-wide text-black uppercase font-serif">
-          {personal.fullName || 'Your Name'}
-        </h1>
-        {personal.jobTitle && (
-          <p className="text-xs uppercase tracking-widest text-gray-600 mt-1 font-sans font-medium">
-            {personal.jobTitle}
-          </p>
-        )}
-        <div className="flex flex-wrap items-center justify-center gap-x-3 text-[11px] text-gray-600 mt-2 font-sans">
-          {personal.location && <span>{personal.location}</span>}
-          {personal.phone && <span>• {personal.phone}</span>}
-          {personal.email && (
-            <span>
-              • <a href={`mailto:${personal.email}`} className="hover:underline">{personal.email}</a>
-            </span>
-          )}
-          {personal.linkedin && (
-            <span>
-              • <a href={`https://${personal.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline">{personal.linkedin}</a>
-            </span>
-          )}
-        </div>
-      </header>
-      );
+        return (
+          <header key="personal" className="border-t-4 border-b border-[#333] py-4 mb-5 text-center">
+            <h1 className="text-3xl font-normal tracking-wide text-black uppercase font-serif">
+              {personal.fullName || 'Your Name'}
+            </h1>
+            {personal.jobTitle && (
+              <p className="text-xs uppercase tracking-widest text-gray-600 mt-1 font-sans font-medium">
+                {personal.jobTitle}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center justify-center gap-x-3 text-[11px] text-gray-600 mt-2 font-sans">
+              {personal.location && <span>{personal.location}</span>}
+              {personal.phone && <span>• {personal.phone}</span>}
+              {personal.email && (
+                <span>
+                  • <a href={`mailto:${personal.email}`} className="hover:underline">{personal.email}</a>
+                </span>
+              )}
+              {personal.linkedin && (
+                <span>
+                  • <a href={`https://${personal.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline">{personal.linkedin}</a>
+                </span>
+              )}
+            </div>
+          </header>
+        );
 
       case 'summary':
-      if (!summary) return null;
-      return (
-      <section key="summary" className="mb-5">
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-1.5 font-sans">
-          Executive Profile
-        </h2>
-        <p className="text-[11.5px] text-gray-800 leading-relaxed italic text-justify">
-          "{summary}"
-        </p>
-      </section>
-      );
+        if (!summary) return null;
+        return (
+          <section key="summary" className="mb-5">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-1.5 font-sans">
+              Executive Profile
+            </h2>
+            <p className="text-[11.5px] text-gray-800 leading-relaxed italic text-justify">
+              "{summary}"
+            </p>
+          </section>
+        );
 
-                  case 'experience':
-                  if (experience.length === 0) return null;
-                  return (
-                  <section key="experience" className="mb-5">
-                    <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-3 font-sans">
-                      Career History
-                    </h2>
-                    <div className="space-y-4">
-                      {experience.map((exp) => (
+      case 'experience':
+        if (experience.length === 0) return null;
+        return (
+          <section key="experience" className="mb-5">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-3 font-sans">
+              Career History
+            </h2>
+            <div className="space-y-4">
+              {experience.map((exp) => (
                 <div key={exp.id || exp._id}>
                   <div className="flex justify-between items-baseline">
                     <h3 className="text-sm font-bold text-black font-serif">{exp.role}</h3>
@@ -79,95 +79,130 @@ export default function ElegantSerif({ resume }) {
               ))}
             </div>
           </section>
-                  );
+        );
 
-                  case 'education':
-                  if (education.length === 0) return null;
-                  return (
-                  <section key="education" className="mb-5">
-                    <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-2 font-sans">
-                      Academic Credentials
-                    </h2>
-                    <div className="space-y-2.5">
-                      {education.map((edu) => (
-                        <div key={edu.id || edu._id} className="flex justify-between items-baseline">
-                          <div>
-                            <h3 className="text-xs font-bold text-black">{edu.school}</h3>
-                            <p className="text-[11px] italic text-gray-700">
-                              {edu.degree} {edu.gpa && <span className="not-italic font-sans text-gray-500">• GPA: {edu.gpa}</span>}
-                            </p>
-                          </div>
-                          <span className="text-[10.5px] text-gray-600 font-sans">{edu.startDate} – {edu.endDate}</span>
-                        </div>
+      case 'education':
+        if (education.length === 0) return null;
+        return (
+          <section key="education" className="mb-5">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-2 font-sans">
+              Academic Credentials
+            </h2>
+            <div className="space-y-2.5">
+              {education.map((edu) => (
+                <div key={edu.id || edu._id} className="flex justify-between items-baseline">
+                  <div>
+                    <h3 className="text-xs font-bold text-black">{edu.school}</h3>
+                    <p className="text-[11px] italic text-gray-700">
+                      {edu.degree} {edu.gpa && <span className="not-italic font-sans text-gray-500">• GPA: {edu.gpa}</span>}
+                    </p>
+                  </div>
+                  <span className="text-[10.5px] text-gray-600 font-sans">{edu.startDate} – {edu.endDate}</span>
+                </div>
               ))}
-          </div>
-        </section>
-      );
+            </div>
+          </section>
+        );
 
-                  case 'skills':
-                  if (skills.length === 0) return null;
-                  return (
-                  <section key="skills" className="mb-5">
-                    <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-2 font-sans">
-                      Areas of Expertise
-                    </h2>
-                    <div className="space-y-1 text-[11px]">
-                      {skills.map((grp, idx) => (
+      case 'skills':
+        if (skills.length === 0) return null;
+        return (
+          <section key="skills" className="mb-5">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-2 font-sans">
+              Areas of Expertise
+            </h2>
+            <div className="space-y-1 text-[11px]">
+              {skills.map((grp, idx) => (
                 <div key={idx} className="flex gap-2">
                   <strong className="font-semibold text-black min-w-[85px] font-sans text-[10.5px] uppercase tracking-wider">{grp.category}:</strong>
                   <span className="text-gray-800">{Array.isArray(grp.items) ? grp.items.join(' • ') : grp.items}</span>
                 </div>
               ))}
-          </div>
-        </section>
-      );
+            </div>
+          </section>
+        );
 
-                  case 'projects':
-                  if (projects.length === 0) return null;
-                  return (
-                  <section key="projects" className="mb-4">
-                    <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-2 font-sans">
-                      Key Initiatives
-                    </h2>
-                    <div className="space-y-2">
-                      {projects.map((proj) => (
-                        <div key={proj.id || proj._id}>
-                          <div className="flex justify-between text-xs font-bold text-black">
-                            <span>{proj.name}</span>
-                            {proj.link && <span className="font-sans text-[10px] text-gray-500 font-normal">{proj.link}</span>}
-                          </div>
-                          {proj.description && <p className="text-[11px] text-gray-700 leading-snug">{proj.description}</p>}
-                        </div>
+      case 'projects':
+        if (projects.length === 0) return null;
+        return (
+          <section key="projects" className="mb-4">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-2 font-sans">
+              Key Initiatives
+            </h2>
+            <div className="space-y-2">
+              {projects.map((proj) => (
+                <div key={proj.id || proj._id}>
+                  <div className="flex justify-between text-xs font-bold text-black">
+                    <span>{proj.name}</span>
+                    {proj.link && <span className="font-sans text-[10px] text-gray-500 font-normal">{proj.link}</span>}
+                  </div>
+                  {proj.description && <p className="text-[11px] text-gray-700 leading-snug">{proj.description}</p>}
+                </div>
               ))}
-          </div>
-        </section>
-      );
+            </div>
+          </section>
+        );
 
       case 'certifications':
-      if (certifications.length === 0) return null;
-      return (
-      <section key="certifications">
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-1.5 font-sans">
-          Honors & Accreditations
-        </h2>
-        <div className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-gray-800">
-          {certifications.map((c) => (
-            <span key={c.id || c._id}>
-              <strong>{c.name}</strong> ({c.issuer}{c.date ? `, ${c.date}` : ''})
-            </span>
-          ))}
-        </div>
-      </section>
-      );
+        if (certifications.length === 0) return null;
+        return (
+          <section key="certifications">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-1.5 font-sans">
+              Honors & Accreditations
+            </h2>
+            <div className="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-gray-800">
+              {certifications.map((c) => (
+                <span key={c.id || c._id}>
+                  <strong>{c.name}</strong> ({c.issuer}{c.date ? `, ${c.date}` : ''})
+                </span>
+              ))}
+            </div>
+          </section>
+        );
 
-      default:
-      return null;
+      default: {
+        const custom = (resume?.customSections || []).find((c) => c.id === key);
+        if (!custom || !custom.items || custom.items.length === 0) return null;
+        return (
+          <section key={custom.id} className="mb-4 resume-section-item">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest text-[#333] border-b border-gray-300 pb-0.5 mb-2 font-sans">
+              {custom.title}
+            </h2>
+            <div className="space-y-2.5">
+              {custom.items.map((item, idx) => (
+                <div key={item.id || idx} className="resume-section-item">
+                  <div className="flex justify-between items-baseline font-bold text-black text-xs font-serif">
+                    <span>
+                      {item.title}
+                      {item.subtitle && (
+                        <span className="font-normal italic text-gray-600 ml-1.5">
+                          ({item.subtitle})
+                        </span>
+                      )}
+                    </span>
+                    {item.date && (
+                      <span className="font-sans text-[10px] text-gray-500 font-normal">
+                        {item.date}
+                      </span>
+                    )}
+                  </div>
+                  {item.description && (
+                    <p className="text-[11px] text-gray-700 leading-snug mt-0.5 font-sans">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      }
     }
   };
 
-      return (
-      <article className="font-serif text-[#222] text-xs leading-relaxed max-w-[800px] mx-auto">
-        {sectionOrder.map((key) => renderSection(key))}
-      </article>
-      );
+  return (
+    <article className="font-serif text-[#222] text-xs leading-relaxed max-w-[800px] mx-auto">
+      {sectionOrder.map((key) => renderSection(key))}
+    </article>
+  );
 }

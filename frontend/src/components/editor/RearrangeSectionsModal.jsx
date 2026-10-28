@@ -7,6 +7,7 @@ import {
   RotateCcw,
   Check,
   Sparkles,
+  Plus,
   User,
   AlignLeft,
   Briefcase,
@@ -21,6 +22,7 @@ import {
   DEFAULT_SECTION_ORDER,
   moveSectionInOrder,
   normalizeSectionOrder,
+  getSectionMetadata,
 } from '../../utils/sectionOrder';
 
 const SECTION_ICONS = {
@@ -37,26 +39,29 @@ export default function RearrangeSectionsModal({
   isOpen,
   onClose,
   sectionOrder,
+  customSections = [],
   onUpdateOrder,
+  onOpenAddSection,
 }) {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
   if (!isOpen) return null;
 
-  const currentOrder = normalizeSectionOrder(sectionOrder);
+  const currentOrder = normalizeSectionOrder(sectionOrder, customSections);
 
   const handleMove = (index, direction) => {
-    const updated = moveSectionInOrder(currentOrder, index, direction);
+    const updated = moveSectionInOrder(currentOrder, index, direction, customSections);
     onUpdateOrder(updated);
   };
 
   const handleReset = () => {
-    onUpdateOrder([...DEFAULT_SECTION_ORDER]);
+    const customIds = (customSections || []).map((c) => c.id).filter(Boolean);
+    onUpdateOrder([...DEFAULT_SECTION_ORDER, ...customIds]);
   };
 
   const handleApplyPreset = (presetOrder) => {
-    onUpdateOrder(normalizeSectionOrder(presetOrder));
+    onUpdateOrder(normalizeSectionOrder(presetOrder, customSections));
   };
 
   // Drag and Drop handlers
@@ -141,11 +146,10 @@ export default function RearrangeSectionsModal({
                     key={preset.id}
                     type="button"
                     onClick={() => handleApplyPreset(preset.order)}
-                    className={`text-left p-2.5 rounded-xl border text-xs transition-all flex flex-col justify-between ${
-                      isSelected
+                    className={`text-left p-2.5 rounded-xl border text-xs transition-all flex flex-col justify-between ${isSelected
                         ? 'border-cv-blue bg-blue-50/60 text-cv-blue shadow-2xs'
                         : 'border-cv-slate-200 bg-white hover:bg-cv-slate-50 text-cv-slate-800'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between w-full">
                       <span className="font-bold truncate">{preset.name}</span>
@@ -179,11 +183,8 @@ export default function RearrangeSectionsModal({
 
             <div className="space-y-2 select-none">
               {currentOrder.map((sectionKey, index) => {
-                const meta = SECTION_METADATA[sectionKey] || {
-                  label: sectionKey,
-                  description: '',
-                };
-                const IconComponent = SECTION_ICONS[sectionKey] || Briefcase;
+                const meta = getSectionMetadata(sectionKey, customSections);
+                const IconComponent = SECTION_ICONS[sectionKey] || Sparkles;
                 const isDragging = draggedIndex === index;
                 const isOver = dragOverIndex === index;
 
@@ -196,13 +197,12 @@ export default function RearrangeSectionsModal({
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, index)}
                     onDragEnd={handleDragEnd}
-                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
-                      isDragging
+                    className={`flex items-center justify-between p-3 rounded-xl border transition-all ${isDragging
                         ? 'opacity-40 border-cv-blue border-dashed bg-blue-50/50'
                         : isOver
-                        ? 'border-cv-blue bg-blue-50/30 scale-[1.01]'
-                        : 'border-cv-slate-200 bg-white hover:border-cv-slate-300 shadow-2xs'
-                    }`}
+                          ? 'border-cv-blue bg-blue-50/30 scale-[1.01]'
+                          : 'border-cv-slate-200 bg-white hover:border-cv-slate-300 shadow-2xs'
+                      }`}
                   >
                     {/* Left: Drag Handle + Number + Icon + Title */}
                     <div className="flex items-center gap-3 min-w-0">
@@ -217,63 +217,80 @@ export default function RearrangeSectionsModal({
                         {index + 1}
                       </div>
 
-                      <div className="w-7 h-7 rounded-lg bg-blue-50 text-cv-blue flex items-center justify-center shrink-0">
-                        <IconComponent className="w-3.5 h-3.5" />
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="text-xs font-bold text-cv-slate-900 truncate">
-                          {meta.label}
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${meta.isCustom ? 'bg-indigo-50 text-indigo-600' : 'bg-blue-50 text-cv-blue'
+                          }`}>
+                          <IconComponent className="w-3.5 h-3.5" />
                         </div>
-                        <div className="text-[10px] text-cv-slate-500 truncate hidden sm:block">
-                          {meta.description}
+
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-cv-slate-900 truncate flex items-center gap-2">
+                              <span>{meta.label}</span>
+                              {meta.isCustom && (
+                                <span className="text-[9.5px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.2 rounded-md">
+                                  Custom
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-cv-slate-500 truncate hidden sm:block">
+                              {meta.description}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Right: Up / Down Buttons */}
+                        <div className="flex items-center gap-1 shrink-0 ml-2">
+                          <button
+                            type="button"
+                            onClick={() => handleMove(index, -1)}
+                            disabled={index === 0}
+                            className="p-1.5 rounded-lg border border-cv-slate-200 text-cv-slate-600 hover:bg-cv-slate-100 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            title="Move Up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMove(index, 1)}
+                            disabled={index === currentOrder.length - 1}
+                            className="p-1.5 rounded-lg border border-cv-slate-200 text-cv-slate-600 hover:bg-cv-slate-100 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            title="Move Down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Right: Up / Down Buttons */}
-                    <div className="flex items-center gap-1 shrink-0 ml-2">
-                      <button
-                        type="button"
-                        onClick={() => handleMove(index, -1)}
-                        disabled={index === 0}
-                        className="p-1.5 rounded-lg border border-cv-slate-200 text-cv-slate-600 hover:bg-cv-slate-100 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors"
-                        title="Move Up"
-                      >
-                        <ArrowUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleMove(index, 1)}
-                        disabled={index === currentOrder.length - 1}
-                        className="p-1.5 rounded-lg border border-cv-slate-200 text-cv-slate-600 hover:bg-cv-slate-100 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors"
-                        title="Move Down"
-                      >
-                        <ArrowDown className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
+                      );
               })}
+                    </div>
+
+                    {onOpenAddSection && (
+                      <button
+                        type="button"
+                        onClick={onOpenAddSection}
+                        className="mt-3 w-full py-2.5 px-3 border border-dashed border-cv-slate-300 hover:border-cv-blue hover:bg-blue-50/30 text-cv-blue rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Custom Section</span>
+                      </button>
+                    )}
+                  </div>
+        </div>
+
+            {/* Footer */}
+            <div className="px-6 py-3.5 border-t border-cv-slate-100 bg-cv-slate-50 flex items-center justify-between shrink-0">
+              <span className="text-xs text-cv-slate-500">
+                Changes update preview and PDF export in real time.
+              </span>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-xs font-bold text-white bg-cv-blue hover:bg-cv-blue-hover rounded-xl shadow-sm transition-all"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="px-6 py-3.5 border-t border-cv-slate-100 bg-cv-slate-50 flex items-center justify-between shrink-0">
-          <span className="text-xs text-cv-slate-500">
-            Changes update preview and PDF export in real time.
-          </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-xs font-bold text-white bg-cv-blue hover:bg-cv-blue-hover rounded-xl shadow-sm transition-all"
-          >
-            Done
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+        );
 }
 

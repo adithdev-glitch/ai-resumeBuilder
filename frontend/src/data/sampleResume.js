@@ -98,4 +98,5 @@ export const sampleResume = {
       date: '2022',
     },
   ],
+  customSections: [],
 };

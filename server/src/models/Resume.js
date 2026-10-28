@@ -77,6 +77,21 @@ const resumeSchema = new mongoose.Schema(
         date: String,
       },
     ],
+    customSections: [
+      {
+        id: String,
+        title: String,
+        items: [
+          {
+            id: String,
+            title: String,
+            subtitle: String,
+            date: String,
+            description: String,
+          },
+        ],
+      },
+    ],
     sectionOrder: {
       type: [String],
       default: undefined,
