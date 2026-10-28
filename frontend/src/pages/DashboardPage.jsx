@@ -128,13 +128,21 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <button
-            onClick={handleCreateNew}
-            className="px-4 py-2 text-xs font-semibold text-white bg-cv-blue hover:bg-cv-blue-hover rounded-lg shadow-sm transition-colors inline-flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            New Resume
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/templates"
+              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg shadow-sm transition-colors inline-flex items-center gap-1.5"
+            >
+              Browse Templates
+            </Link>
+            <button
+              onClick={() => navigate('/templates')}
+              className="px-4 py-2 text-xs font-semibold text-white bg-cv-blue hover:bg-cv-blue-hover rounded-lg shadow-sm transition-colors inline-flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              New Resume
+            </button>
+          </div>
         </div>
 
         {loading ? (

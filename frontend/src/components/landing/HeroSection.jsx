@@ -50,7 +50,7 @@ export default function HeroSection() {
         {/* CTA Button */}
         <div className="mt-8">
           <button
-            onClick={() => navigate('/editor')}
+            onClick={() => navigate('/templates')}
             className="px-8 py-3.5 text-sm font-bold text-white bg-cv-blue hover:bg-cv-blue-hover rounded-xl shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
           >
             Get Started for Free

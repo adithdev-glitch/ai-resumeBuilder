@@ -18,11 +18,11 @@ export default function Footer() {
           <a href="#templates" className="hover:text-cv-blue transition-colors">Templates</a>
           <a href="#pricing" className="hover:text-cv-blue transition-colors">Pricing</a>
           <a href="#faq" className="hover:text-cv-blue transition-colors">FAQ</a>
-          <Link to="/editor" className="font-semibold text-cv-blue hover:underline">Launch Editor</Link>
+          <Link to="/templates" className="font-semibold text-cv-blue hover:underline">Browse Templates</Link>
         </div>
 
         <div>
-          © {new Date().getFullYear()} CVCRAFT. All rights reserved.
+          © {new Date().getFullYear()} ResuMate. All rights reserved.
         </div>
       </div>
     </footer>

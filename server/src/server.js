@@ -32,10 +32,10 @@ app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'cvcraft-server', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', service: 'resumate-server', timestamp: new Date().toISOString() });
 });
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`CVCRAFT server running on http://localhost:${PORT}`);
+  console.log(`ResuMate server running on http://localhost:${PORT}`);
 });

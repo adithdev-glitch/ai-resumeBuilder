@@ -19,7 +19,7 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await login({ email, password });
-      navigate('/dashboard');
+      navigate('/templates');
     } catch (err) {
       setError(err.message || 'Unable to sign in. Please check your credentials.');
     } finally {

@@ -28,6 +28,7 @@ export async function register(req, res) {
     const user = await User.create({ email, password });
     const token = generateToken(user._id);
 
+    res.cookie('resumate_token', token, COOKIE_OPTIONS);
     res.cookie('cvcraft_token', token, COOKIE_OPTIONS);
     return res.status(201).json({
       message: 'Account created successfully.',
@@ -56,6 +57,7 @@ export async function login(req, res) {
     }
 
     const token = generateToken(user._id);
+    res.cookie('resumate_token', token, COOKIE_OPTIONS);
     res.cookie('cvcraft_token', token, COOKIE_OPTIONS);
     return res.json({
       message: 'Signed in successfully.',
@@ -67,6 +69,7 @@ export async function login(req, res) {
 }
 
 export async function logout(req, res) {
+  res.clearCookie('resumate_token', COOKIE_OPTIONS);
   res.clearCookie('cvcraft_token', COOKIE_OPTIONS);
   return res.json({ message: 'Signed out successfully.' });
 }

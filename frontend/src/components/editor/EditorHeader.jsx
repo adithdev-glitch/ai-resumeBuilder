@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import CvCraftLogo from '../common/CvCraftLogo';
-import { Download, FileText, Check, AlertCircle, Loader2, ArrowLeft, ChevronDown } from 'lucide-react';
-import { exportResumeToDocx } from '../../utils/docxExport';
+import { Download, Check, AlertCircle, Loader2, ArrowLeft, Printer } from 'lucide-react';
+import { exportResumeToPdf, openPrintDialog } from '../../utils/pdfExport';
 import { useAuth } from '../../context/AuthContext';
 
 export default function EditorHeader({
@@ -13,24 +13,26 @@ export default function EditorHeader({
   setMobileTab,
 }) {
   const { user } = useAuth();
-  const [showExportMenu, setShowExportMenu] = useState(false);
-  const [isExportingDocx, setIsExportingDocx] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [downloadNotification, setDownloadNotification] = useState('');
 
-  const handlePrintPdf = () => {
-    setShowExportMenu(false);
-    window.print();
+  const handleDownloadPdf = async () => {
+    setIsExportingPdf(true);
+    setDownloadNotification('');
+    try {
+      const result = await exportResumeToPdf(resume);
+      setDownloadNotification(`Downloaded "${result.filename}" to your Downloads folder.`);
+      setTimeout(() => setDownloadNotification(''), 6000);
+    } catch {
+      // Fallback to print dialog
+      openPrintDialog();
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
-  const handleDownloadDocx = async () => {
-    setShowExportMenu(false);
-    setIsExportingDocx(true);
-    try {
-      await exportResumeToDocx(resume);
-    } catch {
-      alert('Failed to generate DOCX file.');
-    } finally {
-      setIsExportingDocx(false);
-    }
+  const handlePrintPdf = () => {
+    openPrintDialog();
   };
 
   return (
@@ -38,11 +40,12 @@ export default function EditorHeader({
       {/* Left: Back button + Logo + Resume Title */}
       <div className="flex items-center gap-4 min-w-0">
         <Link
-          to="/"
-          className="text-cv-slate-500 hover:text-cv-slate-900 p-1 rounded-md transition-colors"
-          title="Back to Home"
+          to="/templates"
+          className="text-cv-slate-500 hover:text-cv-slate-900 p-1 rounded-md transition-colors flex items-center gap-1 text-xs font-medium"
+          title="Back to Templates"
         >
           <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Templates</span>
         </Link>
 
         <Link to="/" className="shrink-0 flex items-center">
@@ -134,53 +137,43 @@ export default function EditorHeader({
           </Link>
         )}
 
-        <div className="relative">
+        <div className="flex items-center gap-2">
+          {/* Print / Save as PDF Secondary Button */}
           <button
             type="button"
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            className="text-xs font-semibold text-white bg-cv-blue hover:bg-cv-blue-hover px-3.5 py-1.5 rounded-lg shadow-sm transition-colors inline-flex items-center gap-1.5"
+            onClick={handlePrintPdf}
+            className="text-xs font-semibold text-cv-slate-700 bg-cv-slate-100 hover:bg-cv-slate-200 border border-cv-slate-200 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-sm"
+            title="Open system print dialog to print or save vector PDF"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export</span>
-            <ChevronDown className="w-3 h-3 ml-0.5 opacity-80" />
+            <Printer className="w-3.5 h-3.5 text-cv-slate-600" />
+            <span className="hidden sm:inline">Print / Save as PDF</span>
           </button>
 
-          {showExportMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-cv-slate-200 rounded-xl shadow-modal py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
-              <button
-                type="button"
-                onClick={handlePrintPdf}
-                className="w-full text-left px-3.5 py-2 text-xs text-cv-slate-800 hover:bg-cv-slate-50 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-cv-blue" />
-                  <div>
-                    <div className="font-semibold">Print to PDF</div>
-                    <div className="text-[10px] text-cv-slate-500">ATS-compliant formatting</div>
-                  </div>
-                </div>
-              </button>
-
-              <div className="h-[1px] bg-cv-slate-100 my-1" />
-
-              <button
-                type="button"
-                onClick={handleDownloadDocx}
-                disabled={isExportingDocx}
-                className="w-full text-left px-3.5 py-2 text-xs text-cv-slate-800 hover:bg-cv-slate-50 flex items-center justify-between disabled:opacity-50"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-emerald-600" />
-                  <div>
-                    <div className="font-semibold">Download DOCX</div>
-                    <div className="text-[10px] text-cv-slate-500">Editable Word document</div>
-                  </div>
-                </div>
-              </button>
-            </div>
-          )}
+          {/* Download PDF Primary Button */}
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            disabled={isExportingPdf}
+            className="text-xs font-semibold text-white bg-cv-blue hover:bg-cv-blue-hover px-3.5 py-1.5 rounded-lg shadow-sm transition-colors inline-flex items-center gap-1.5 disabled:opacity-70 cursor-pointer"
+            title="Download clean single-page PDF directly to your device"
+          >
+            {isExportingPdf ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5" />
+            )}
+            <span>{isExportingPdf ? 'Downloading PDF...' : 'Download PDF'}</span>
+          </button>
         </div>
       </div>
+
+      {/* Download Confirmation Toast */}
+      {downloadNotification && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+          <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{downloadNotification}</span>
+        </div>
+      )}
     </header>
   );
 }

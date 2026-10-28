@@ -9,7 +9,7 @@ export function ResumeProvider({ children }) {
   const { user } = useAuth();
   const [resume, setResume] = useState(() => {
     // Try restoring from local backup or default to realistic sample
-    const saved = localStorage.getItem('cvcraft_current_resume');
+    const saved = localStorage.getItem('resumate_current_resume') || localStorage.getItem('cvcraft_current_resume');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -38,7 +38,7 @@ export function ResumeProvider({ children }) {
     }
 
     setSaveStatus('unsaved');
-    localStorage.setItem('cvcraft_current_resume', JSON.stringify(resume));
+    localStorage.setItem('resumate_current_resume', JSON.stringify(resume));
 
     const timeout = setTimeout(async () => {
       if (user && resume._id) {

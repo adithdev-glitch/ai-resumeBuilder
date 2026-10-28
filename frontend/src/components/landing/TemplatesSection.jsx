@@ -88,6 +88,16 @@ export default function TemplatesSection() {
             </div>
           ))}
         </div>
+
+        <div className="mt-12 text-center">
+          <button
+            onClick={() => navigate('/templates')}
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
+          >
+            <span>Explore All 11+ ATS-Friendly Templates</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </section>
   );

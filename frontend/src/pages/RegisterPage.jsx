@@ -31,7 +31,7 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       await register({ email, password });
-      navigate('/dashboard');
+      navigate('/templates');
     } catch (err) {
       setError(err.message || 'Unable to create account. Please try another email.');
     } finally {

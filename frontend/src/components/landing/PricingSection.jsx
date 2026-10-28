@@ -33,7 +33,7 @@ export default function PricingSection() {
               <ul className="mt-6 space-y-3 text-xs text-cv-slate-700">
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>All 3 ATS-friendly templates</span>
+                  <span>All 11+ ATS-friendly templates</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -51,7 +51,7 @@ export default function PricingSection() {
             </div>
 
             <Link
-              to="/editor"
+              to="/templates"
               className="mt-8 w-full py-2.5 text-center text-xs font-semibold text-cv-slate-800 bg-cv-slate-100 hover:bg-cv-slate-200 rounded-xl transition-colors"
             >
               Start Free

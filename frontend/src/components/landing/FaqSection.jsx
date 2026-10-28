@@ -7,7 +7,7 @@ export default function FaqSection() {
   const faqs = [
     {
       q: 'Why are these templates strictly ATS-friendly?',
-      a: 'Many modern resume builders use multi-column graphical columns, tables, or complex background graphics that cause automated Applicant Tracking Systems (Workday, Greenhouse, Lever) to fail to extract your job history. CVCRAFT renders clean, single-column semantic HTML with true selectable text and standard heading hierarchies.',
+      a: 'Many modern resume builders use multi-column graphical columns, tables, or complex background graphics that cause automated Applicant Tracking Systems (Workday, Greenhouse, Lever) to fail to extract your job history. ResuMate renders clean, single-column semantic HTML with true selectable text and standard heading hierarchies.',
     },
     {
       q: 'Does the AI ever invent companies, dates, or credentials?',

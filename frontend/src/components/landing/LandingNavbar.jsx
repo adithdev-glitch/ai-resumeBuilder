@@ -39,25 +39,31 @@ export default function LandingNavbar() {
             {templatesDropdown && (
               <div
                 onMouseLeave={() => setTemplatesDropdown(false)}
-                className="absolute top-full left-0 mt-1 w-52 bg-white border border-cv-slate-200 rounded-xl shadow-modal py-2 z-50 animate-in fade-in zoom-in-95 duration-100"
+                className="absolute top-full left-0 mt-1 w-56 bg-white border border-cv-slate-200 rounded-xl shadow-modal py-2 z-50 animate-in fade-in zoom-in-95 duration-100"
               >
                 <Link
-                  to="/editor"
+                  to="/templates"
                   className="block px-4 py-2 text-xs font-semibold text-cv-slate-800 hover:bg-cv-blue-50 hover:text-cv-blue"
                 >
-                  Classic Serif (ATS Single-Column)
+                  Browse All ATS Templates
                 </Link>
                 <Link
-                  to="/editor"
+                  to="/templates"
                   className="block px-4 py-2 text-xs font-semibold text-cv-slate-800 hover:bg-cv-blue-50 hover:text-cv-blue"
                 >
-                  Modern Sans (High Contrast)
+                  Classic Clear (100% ATS)
                 </Link>
                 <Link
-                  to="/editor"
+                  to="/templates"
                   className="block px-4 py-2 text-xs font-semibold text-cv-slate-800 hover:bg-cv-blue-50 hover:text-cv-blue"
                 >
-                  Compact One-Page (Executive)
+                  Atlantic Blue (Modern Executive)
+                </Link>
+                <Link
+                  to="/templates"
+                  className="block px-4 py-2 text-xs font-semibold text-cv-slate-800 hover:bg-cv-blue-50 hover:text-cv-blue"
+                >
+                  Ivy League ATS (Executive)
                 </Link>
               </div>
             )}
@@ -92,7 +98,7 @@ export default function LandingNavbar() {
           )}
 
           <button
-            onClick={() => navigate('/editor')}
+            onClick={() => navigate('/templates')}
             className="px-6 py-2 text-sm font-semibold text-white bg-cv-blue hover:bg-cv-blue-hover rounded-xl shadow-sm transition-all hover:shadow hover:-translate-y-0.5 active:translate-y-0"
           >
             Get Started
@@ -127,7 +133,7 @@ export default function LandingNavbar() {
             Features
           </a>
           <Link
-            to="/editor"
+            to="/templates"
             onClick={() => setMobileMenuOpen(false)}
             className="block text-sm font-medium text-cv-slate-700 hover:text-cv-blue"
           >
@@ -156,7 +162,7 @@ export default function LandingNavbar() {
               Login
             </Link>
             <Link
-              to="/editor"
+              to="/templates"
               className="text-center py-2 text-sm font-semibold text-white bg-cv-blue rounded-xl"
             >
               Get Started
