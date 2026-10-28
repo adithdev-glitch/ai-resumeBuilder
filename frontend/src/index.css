@@ -22,7 +22,7 @@
 /* Hero Background Grid */
 .hero-grid-pattern {
   background-size: 56px 56px;
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(226, 232, 240, 0.45) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(226, 232, 240, 0.45) 1px, transparent 1px);
 }
@@ -32,13 +32,16 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
@@ -49,17 +52,17 @@
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0;
+    margin: 18mm;
   }
 
-  html, body {
+  html,
+  body {
     margin: 0 !important;
     padding: 0 !important;
-    width: 210mm !important;
-    height: 100% !important;
-    max-height: 100% !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
     background: #FFFFFF !important;
     color: #000000 !important;
     font-size: 11pt !important;
@@ -77,8 +80,8 @@
   textarea,
   select,
   header:not(#resume-document header),
-  #root > div > header,
-  #root > div > main > section:first-child {
+  #root>div>header,
+  #root>div>main>section:first-child {
     display: none !important;
   }
 
@@ -91,21 +94,21 @@
 
   /* Unconstrain all parent wrappers so resume isn't clipped or given extra margins/padding */
   #root,
-  #root > div,
-  #root > div > main,
-  #root > div > main > section,
-  #root > div > main > section > div,
-  #root > div > main > section > div > div,
+  #root>div,
+  #root>div>main,
+  #root>div>main>section,
+  #root>div>main>section>div,
+  #root>div>main>section>div>div,
   .min-h-screen,
-  body > div {
+  body>div {
     display: block !important;
     position: static !important;
     overflow: visible !important;
-    width: 210mm !important;
-    max-width: 210mm !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
-    max-height: 296mm !important;
+    max-height: none !important;
     margin: 0 !important;
     padding: 0 !important;
     transform: none !important;
@@ -115,30 +118,26 @@
   }
 
   /* Hide preview toolbar */
-  #root > div > main > section > div > div:first-child {
+  #root>div>main>section>div>div:first-child {
     display: none !important;
   }
 
-  /* Resume Document Container - Fits cleanly into exact single A4 without overflow */
+  /* Resume Document Container - Fits cleanly into exact A4 pages with strict 18mm margins */
   #resume-document {
     display: block !important;
     position: relative !important;
     box-sizing: border-box !important;
-    width: 210mm !important;
-    max-width: 210mm !important;
+    width: 100% !important;
+    max-width: 100% !important;
     min-height: 0 !important;
-    height: 296mm !important;
-    max-height: 296mm !important;
-    margin: 0 auto !important;
-    padding: 18mm !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
     background: #FFFFFF !important;
-    overflow: hidden !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
-    page-break-before: avoid !important;
-    break-before: avoid !important;
+    overflow: visible !important;
   }
 
   /* Prevent trailing margins on the last element from triggering an extra blank page */
@@ -148,12 +147,17 @@
   }
 
   /* Prevent awkward page breaks in the middle of an entry */
-  .resume-section-item {
+  .resume-section-item,
+  section,
+  header {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
-  .resume-section-header {
+  .resume-section-header,
+  h1,
+  h2,
+  h3 {
     page-break-after: avoid !important;
     break-after: avoid !important;
   }

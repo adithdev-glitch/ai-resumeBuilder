@@ -78,7 +78,7 @@ export default function PrintPage() {
       <div className="flex-1 w-full flex justify-center py-6 sm:py-10 px-2 sm:px-4 print:p-0 print:m-0 print:block print:w-[210mm]">
         <div
           id="resume-document"
-          className="w-[210mm] min-h-[297mm] bg-white p-[18mm] shadow-2xl border border-slate-200/80 rounded-none print:shadow-none print:border-none print:p-[18mm] print:m-0 print:min-h-0 print:h-[296mm] print:max-h-[296mm] print:overflow-hidden"
+          className={`w-[210mm] min-h-[297mm] bg-white shadow-2xl border border-slate-200/80 rounded-none print:shadow-none print:border-none print:p-0 print:m-0 print:min-h-0 print:h-auto print:max-h-none print:overflow-visible flex flex-col ${currentTemplateId === 'atlantic' ? 'p-0' : 'p-[18mm]'}`}
         >
           <ActiveComponent resume={resume} />
         </div>

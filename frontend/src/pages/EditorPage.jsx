@@ -11,7 +11,15 @@ import CertificationsSection from '../components/editor/FormSections/Certificati
 import ResumePreview from '../components/preview/ResumePreview';
 import DiffProposal from '../components/editor/DiffProposal';
 import TailorModal from '../components/editor/TailorModal';
+import RearrangeSectionsModal from '../components/editor/RearrangeSectionsModal';
 import { aiApi } from '../api/ai';
+import { ArrowUpDown, SlidersHorizontal, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  DEFAULT_SECTION_ORDER,
+  normalizeSectionOrder,
+  moveSectionInOrder,
+  SECTION_METADATA,
+} from '../utils/sectionOrder';
 
 export default function EditorPage() {
   const { resume, setResume, activeTemplate, setActiveTemplate, saveStatus } = useResume();
@@ -22,6 +30,18 @@ export default function EditorPage() {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [isTailoring, setIsTailoring] = useState(false);
   const [isTailorModalOpen, setIsTailorModalOpen] = useState(false);
+  const [isRearrangeModalOpen, setIsRearrangeModalOpen] = useState(false);
+
+  const sectionOrder = normalizeSectionOrder(resume.sectionOrder);
+
+  const handleUpdateSectionOrder = (newOrder) => {
+    handleUpdate('sectionOrder', newOrder);
+  };
+
+  const handleMoveSection = (index, direction) => {
+    const updated = moveSectionInOrder(sectionOrder, index, direction);
+    handleUpdate('sectionOrder', updated);
+  };
 
   // Diff Proposal State
   const [diffProposal, setDiffProposal] = useState({
@@ -30,7 +50,7 @@ export default function EditorPage() {
     contextNote: '',
     original: '',
     suggested: '',
-    onAccept: () => {},
+    onAccept: () => { },
   });
 
   const handleUpdate = (field, value) => {
@@ -134,6 +154,67 @@ export default function EditorPage() {
     }
   };
 
+  const renderSectionComponent = (sectionKey) => {
+    switch (sectionKey) {
+      case 'personal':
+        return (
+          <ContactSection
+            personal={resume.personal}
+            onChange={(data) => handleUpdate('personal', data)}
+          />
+        );
+      case 'summary':
+        return (
+          <SummarySection
+            summary={resume.summary}
+            onChange={(data) => handleUpdate('summary', data)}
+            onGenerateSummary={handleGenerateSummary}
+            isGenerating={isGeneratingSummary}
+          />
+        );
+      case 'experience':
+        return (
+          <ExperienceSection
+            experience={resume.experience}
+            onChange={(data) => handleUpdate('experience', data)}
+            onImproveBullet={handleImproveBullet}
+            onOpenTailorModal={() => setIsTailorModalOpen(true)}
+            improvingBulletId={improvingBulletId}
+          />
+        );
+      case 'education':
+        return (
+          <EducationSection
+            education={resume.education}
+            onChange={(data) => handleUpdate('education', data)}
+          />
+        );
+      case 'projects':
+        return (
+          <ProjectsSection
+            projects={resume.projects}
+            onChange={(data) => handleUpdate('projects', data)}
+          />
+        );
+      case 'skills':
+        return (
+          <SkillsSection
+            skills={resume.skills}
+            onChange={(data) => handleUpdate('skills', data)}
+          />
+        );
+      case 'certifications':
+        return (
+          <CertificationsSection
+            certifications={resume.certifications}
+            onChange={(data) => handleUpdate('certifications', data)}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white">
       {/* Top Navigation */}
@@ -149,58 +230,92 @@ export default function EditorPage() {
       <main className="flex-1 flex overflow-hidden">
         {/* Left Panel: Form Sections */}
         <section
-          className={`w-full lg:w-1/2 h-full overflow-y-auto bg-cv-slate-50 border-r border-cv-slate-200 p-4 sm:p-6 lg:p-8 space-y-6 ${
-            mobileTab === 'edit' ? 'block' : 'hidden lg:block'
-          }`}
+          className={`w-full lg:w-1/2 h-full overflow-y-auto bg-cv-slate-50 border-r border-cv-slate-200 p-4 sm:p-6 lg:p-8 space-y-6 ${mobileTab === 'edit' ? 'block' : 'hidden lg:block'
+            }`}
         >
-          <div className="max-w-2xl mx-auto space-y-6 pb-20">
-            <ContactSection
-              personal={resume.personal}
-              onChange={(data) => handleUpdate('personal', data)}
-            />
+            <div className="max-w-2xl mx-auto space-y-5 pb-20">
+              {/* Rearrange Sections Top Toolbar */}
+              <div className="bg-white rounded-xl border border-cv-slate-200 p-3 sm:px-4 sm:py-3 shadow-xs flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-cv-blue flex items-center justify-center shrink-0">
+                    <ArrowUpDown className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-cv-slate-900 flex items-center gap-2">
+                      <span>Section Sequence</span>
+                      <span className="text-[10px] font-semibold text-cv-slate-500 bg-cv-slate-100 px-2 py-0.5 rounded-md border border-cv-slate-200">
+                        {sectionOrder.length} Sections
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-cv-slate-500 hidden sm:block">
+                      Use arrows on any section or click to reorder all
+                    </p>
+                  </div>
+                </div>
 
-            <SummarySection
-              summary={resume.summary}
-              onChange={(data) => handleUpdate('summary', data)}
-              onGenerateSummary={handleGenerateSummary}
-              isGenerating={isGeneratingSummary}
-            />
+                <button
+                  type="button"
+                  onClick={() => setIsRearrangeModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-cv-blue hover:text-white bg-blue-50 hover:bg-cv-blue border border-blue-200 hover:border-transparent rounded-lg transition-all shadow-2xs cursor-pointer"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <span>Rearrange All</span>
+                </button>
+              </div>
 
-            <ExperienceSection
-              experience={resume.experience}
-              onChange={(data) => handleUpdate('experience', data)}
-              onImproveBullet={handleImproveBullet}
-              onOpenTailorModal={() => setIsTailorModalOpen(true)}
-              improvingBulletId={improvingBulletId}
-            />
+              {/* Dynamically Ordered Section Cards */}
+              {sectionOrder.map((sectionKey, index) => {
+                const meta = SECTION_METADATA[sectionKey] || { label: sectionKey };
+                const isFirst = index === 0;
+                const isLast = index === sectionOrder.length - 1;
 
-            <EducationSection
-              education={resume.education}
-              onChange={(data) => handleUpdate('education', data)}
-            />
+                return (
+                  <div key={sectionKey} className="space-y-1.5">
+                    {/* Section Position Pill & Controls */}
+                    <div className="flex items-center justify-between px-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center justify-center w-4.5 h-4.5 rounded bg-cv-slate-200 text-[10px] font-bold text-cv-slate-700">
+                          {index + 1}
+                        </span>
+                        <span className="text-[10.5px] font-bold uppercase tracking-wider text-cv-slate-500">
+                          {meta.label}
+                        </span>
+                      </div>
 
-            <ProjectsSection
-              projects={resume.projects}
-              onChange={(data) => handleUpdate('projects', data)}
-            />
+                      <div className="flex items-center gap-0.5 bg-white border border-cv-slate-200 rounded-md p-0.5 shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => handleMoveSection(index, -1)}
+                          disabled={isFirst}
+                          title={`Move ${meta.label} Up`}
+                          className="p-1 rounded hover:bg-cv-slate-100 text-cv-slate-600 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <div className="w-[1px] h-3 bg-cv-slate-200" />
+                        <button
+                          type="button"
+                          onClick={() => handleMoveSection(index, 1)}
+                          disabled={isLast}
+                          title={`Move ${meta.label} Down`}
+                          className="p-1 rounded hover:bg-cv-slate-100 text-cv-slate-600 hover:text-cv-slate-900 disabled:opacity-20 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
 
-            <SkillsSection
-              skills={resume.skills}
-              onChange={(data) => handleUpdate('skills', data)}
-            />
-
-            <CertificationsSection
-              certifications={resume.certifications}
-              onChange={(data) => handleUpdate('certifications', data)}
-            />
-          </div>
+                    {renderSectionComponent(sectionKey)}
+                  </div>
+                );
+              })}
+            </div>
         </section>
 
         {/* Right Panel: Live Preview */}
         <section
-          className={`w-full lg:w-1/2 h-full overflow-hidden ${
-            mobileTab === 'preview' ? 'block' : 'hidden lg:block'
-          }`}
+          className={`w-full lg:w-1/2 h-full overflow-hidden ${mobileTab === 'preview' ? 'block' : 'hidden lg:block'
+            }`}
         >
           <ResumePreview
             resume={resume}
@@ -227,6 +342,14 @@ export default function EditorPage() {
         onClose={() => setIsTailorModalOpen(false)}
         onTailorSubmit={handleTailorSubmit}
         isTailoring={isTailoring}
+      />
+
+      {/* Rearrange Sections Modal */}
+      <RearrangeSectionsModal
+        isOpen={isRearrangeModalOpen}
+        onClose={() => setIsRearrangeModalOpen(false)}
+        sectionOrder={sectionOrder}
+        onUpdateOrder={handleUpdateSectionOrder}
       />
     </div>
   );

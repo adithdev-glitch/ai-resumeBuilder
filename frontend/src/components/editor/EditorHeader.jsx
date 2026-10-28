@@ -98,22 +98,20 @@ export default function EditorHeader({
         <button
           type="button"
           onClick={() => setMobileTab('edit')}
-          className={`px-3 py-1 font-semibold rounded-md transition-colors ${
-            mobileTab === 'edit'
+          className={`px-3 py-1 font-semibold rounded-md transition-colors ${mobileTab === 'edit'
               ? 'bg-white text-cv-slate-900 shadow-sm'
               : 'text-cv-slate-600 hover:text-cv-slate-900'
-          }`}
+            }`}
         >
           Form
         </button>
         <button
           type="button"
           onClick={() => setMobileTab('preview')}
-          className={`px-3 py-1 font-semibold rounded-md transition-colors ${
-            mobileTab === 'preview'
+          className={`px-3 py-1 font-semibold rounded-md transition-colors ${mobileTab === 'preview'
               ? 'bg-white text-cv-slate-900 shadow-sm'
               : 'text-cv-slate-600 hover:text-cv-slate-900'
-          }`}
+            }`}
         >
           Preview
         </button>
@@ -155,7 +153,7 @@ export default function EditorHeader({
             onClick={handleDownloadPdf}
             disabled={isExportingPdf}
             className="text-xs font-semibold text-white bg-cv-blue hover:bg-cv-blue-hover px-3.5 py-1.5 rounded-lg shadow-sm transition-colors inline-flex items-center gap-1.5 disabled:opacity-70 cursor-pointer"
-            title="Download clean single-page PDF directly to your device"
+            title="Download clean high-resolution A4 PDF directly to your device"
           >
             {isExportingPdf ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

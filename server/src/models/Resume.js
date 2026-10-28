@@ -77,6 +77,10 @@ const resumeSchema = new mongoose.Schema(
         date: String,
       },
     ],
+    sectionOrder: {
+      type: [String],
+      default: undefined,
+    },
   },
   { timestamps: true }
 );
